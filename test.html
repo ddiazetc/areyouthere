@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=utf-8>
+    <title>My first Three.js app</title>
+    <style>
+        body { margin: 0; }
+        canvas { width: 100%; height: 100% }
+    </style>
+</head>
+    <body>
+        <script src="js/three.js"></script>
+        <script src="js/OrbitControls.js"></script>
+        <script>
+
+            var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera(50, 500 / 400, 0.1, 1000);
+
+            var renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            var geometry = new THREE.SphereGeometry(1, 4, 4);
+            var material = new THREE.MeshNormalMaterial();
+
+
+            for(var i=0; i<3; i++){
+                var sphere;
+                for(var j=0; j<3; j++) {
+                    geometry = new THREE.SphereGeometry(.5, 4, 4);
+                    sphere = new THREE.Mesh(geometry, material);
+                    scene.add(sphere);
+                    sphere.position.x+=j;
+                    sphere.position.y+=
+                    console.log(i,j);
+                }
+                sphere.position.y += i+1;
+            }
+
+
+            camera.position.z = 15;
+            camera.position.x = 0;
+            var render = function () {
+                requestAnimationFrame(render);
+
+                sphere.rotation.y += 0.01;
+
+                renderer.render(scene, camera);
+            };
+
+            render();
+            /*var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+            var renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            var geometry = new THREE.BoxGeometry(1,1,1);
+            var material = new THREE.MeshBasicMaterial( {color:0xFFFFFF});
+            var cube = new THREE.Mesh(geometry, material);
+            var pointLight = new THREE.PointLight(0xFFFFFF);
+
+//            var sphereGeometry = new THREE.SphereGeometry();
+//            var sphere = new THREE.Mesh(sphereGeometry, material);
+//            pointLight.position.x=5;
+//            pointLight.position.y=5;
+//            pointLight.position.z=5;
+
+//            sphere.position.x = 0;
+//            sphere.position.y=5;
+//            sphere.position.z=5;
+
+            scene.add(pointLight);
+            scene.add(cube);
+            //scene.add(sphere);
+            camera.position.z=0 ;
+
+            // controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // controls.target = new THREE.Vector3(0,100,0);
+
+            // function addLights(){
+            // 	var dirLight - new THREE.DirectionalLight(0xffffff, 1);
+            // 	dirLight.position.set(100,100,50);
+            // 	scene.add(dirLight);
+            // }
+
+            // function animate(){
+            // 	renderer.render(scene, camera);
+            // 	requestAnimationFrame(animate);
+            // 	controls.update();
+            // }
+
+            function render(){
+                requestAnimationFrame(render);
+                cube.rotation.x+=0.1;
+                cube.rotation.y+=0.1;
+                renderer.render(scene, camera);
+            }
+            render();*/
+        </script>
+    </body>
+</html>

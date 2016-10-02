@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+</head>
+<body>
+    <script src="three.js-master/build/three.min.js"></script>
+       <!--<script src="js/three.min.js"></script>-->
+    <script src="three.js-master/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.rawgit.com/mohayonao/web-audio-api-shim/master/build/web-audio-api-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/1.0.0/fetch.min.js"></script>
+    <!--<script src="music.js"></script>-->
+   <script src="https://tonejs.github.io/CDN/r7/Tone.js"></script>
+    <!--for synthesizing tones using tone.js-->
+    <script src="bit8.js"></script>
+
+    <!--<script src="synth.js"></script>-->
+    <style>
+        body { margin: 0;
+            background-color: #fff;
+            overflow: hidden;}
+        canvas { width: 100%; height: 100% }
+    </style>
+    <script>
+        var camera;
+        var scene;
+        var renderer;
+        var mesh;
+        var controls;
+
+        var light1, bulblight;
+
+        var rows=5;
+        var cols=5;
+        var lightArray = new Array(rows);
+        for(var i=0; i<rows; i++) {
+            lightArray[i] = new Array(cols);
+        }
+
+        var bluePoint;
+        var t=0;
+        var sphere;
+
+        var randRow = randInt(rows);
+        var randCol = randInt(cols);
+
+        //var randRow = (Math.random()*100)%rows;
+        //var randCol = (Math.random()*100)%cols;
+        var shining=true;
+
+        init();
+        animate();
+
+        function randInt(range){ //ranges from 0 to range
+            return parseInt(Math.random()*100)%range;
+        }
+
+        function init(){
+           // document.body.style.backgroundColor = 0xffffff;
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 1, 1000);
+            camera.position.set(0,-100,0);
+
+            //blue cube
+            var geometry = new THREE.CubeGeometry(10,10,10);
+            var material = new THREE.MeshPhongMaterial(
+                    {color: 0xffffff, specular: 0xffffff, shininess: 30});
+            mesh = new THREE.Mesh(geometry, material);
+            mesh.position.z = -50;
+            //scene.add(mesh);
+
+            var plane = new THREE.CubeGeometry(500,1,500);
+
+            var floorMat = new THREE.MeshPhongMaterial(
+                    {color: 0xffffff, specular: 0xffffff, shininess: 30});
+            var floor = new THREE.Mesh(plane,floorMat);
+            floor.position.set(0,10,0);
+            scene.add(floor);
+
+            var sphereGeom =  new THREE.SphereGeometry( 0.2, 16, 8 ); //radius,widthSegments,heightSegments
+            var emissiveMaterial = new THREE.MeshStandardMaterial({
+                emissive: 0xffffee,
+                emissiveIntensity: 1,
+                color: 0x000000
+                //alphaMap: 0x000000
+            });
+
+            bulbLight = new THREE.PointLight(0xffffff,1,100,2);
+            //bulbLight.add(new THREE.Mesh(sphereGeom, emissiveMaterial));
+            //scene.add(bulbLight);
+
+            //var blueMaterial = new THREE.MeshBasicMaterial( { color: 0x0000ff, transparent: true, opacity: 0.5 } );
+            sphere = new THREE.Mesh( sphereGeom, emissiveMaterial );
+            //scene.add(sphere);
+
+            //add lights
+            var arr_sf = 20; //array scale factor
+            for(var i=0; i<rows; i++){
+                for(var j=0; j<cols; j++){
+//                    lightArray[i][j]=new THREE.SphereGeometry(0.2,16,8);
+//                    lightArray[i][j]=new THREE.Mesh(sphereGeom, emissiveMaterial);
+                    lightArray[i][j] = new THREE.PointLight(0xffffff,0,30,2);
+                    lightArray[i][j].position.set(i*arr_sf, 0, j*arr_sf);
+                    scene.add(lightArray[i][j]);
+                    //console.log(i*arr_sf,j*arr_sf);
+                }
+            }
+
+
+            //scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+            /*var dirLight = new THREE.DirectionalLight(0xffffff);
+             dirLight.position.set(0,1,1).normalize(); //angle of light xyz coordinate
+             scene.add(dirLight);*/
+            /*var dirLight = new THREE.DirectionalLight(0xffffff,1);
+             dirLight.position.set(100,100,50);
+             scene.add(dirLight);
+             var ambLight = new THREE.AmbientLight(0x404040);
+             scene.add(ambLight);*/
+            //bluePoint = new THREE.PointLight(0x0033ff,3,50); //color,intensity,distance,decay
+            //bluePoint.position.set(0,0,0);
+            //scene.add(bluePoint);
+            //scene.add(new THREE.PointLightHelper(bluePoint,3));
+
+            //from  https://threejs.org/examples/#canvas_lights_pointlights
+            var program = function ( context ) {
+                context.beginPath();
+                context.arc( 0, 0, 0.5, 0, Math.PI*2, true );
+                context.fill();
+            };
+            //light1 = new THREE.PointLight( 0xff0040, 1, 50 );
+           // scene.add( light1 );
+            //var sprite = new THREE.Sprite( new THREE.SpriteCanvasMaterial( { color: 0xff0040, program: program } ) );
+            //light1.add( sprite );
+
+            currLight = lightArray[randRow][randCol];
+
+
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            //add the controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.target = new THREE.Vector3(0,100,0);
+        }
+
+        function animate(){
+            //bulbLight.position.set(0,0,Math.sin(t));
+            //bulbLight.intensity=Math.pow(Math.sin(t),2);
+            //mesh.rotation.x += .05;
+            //mesh.rotation.y += .05;
+            //camera.position.y+= .1;
+            sphere.position.set(0,0,Math.sin(t));
+            /*bluePoint.intensity = Math.pow(Math.sin(t),2);
+            bluePoint.position.x = 10*Math.cos(t);
+            bluePoint.position.y = 10*Math.cos(t);*/
+
+            t+=0.03;
+            //console.log(t);
+            if(t>Math.PI){
+                t=0;
+                shining=false;
+                randRow = randInt(rows);
+                randCol = randInt(cols);
+                currLight = lightArray[randRow][randCol];
+                let randNote = randInt(notesC.length);
+                let octave=1;
+                synth.triggerAttackRelease(notesC[randNote]+octave,Math.PI);
+            }
+
+            currLight.intensity = Math.pow(Math.sin(t),2);
+
+
+            /*for(var i=0;i<lightArray.length; i++){
+                for(var j=0; j<lightArray[i].length; j++){
+                    lightArray[i][j].intensity = Math.pow(Math.sin(t),2);
+                }
+            }*/
+            requestAnimationFrame(animate);
+            controls.update();
+            render();
+        }
+
+        function render(){
+            renderer.render(scene, camera);
+
+        }
+
+    </script>
+</body>
+</html>
